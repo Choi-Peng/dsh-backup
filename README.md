@@ -45,10 +45,12 @@ The same controls have a visual entry: a **Backup** tab inside Settings → Plug
 (`dsh web`). It shows the destination, auto-backup state, GitHub sync status, and
 every archive with its size, and offers one-click back-up-now, per-archive
 verify, download, and restore with a dry-run preview plus explicit confirmation.
-Downloads stream from the loopback-only route `GET /backup-download/<name>`.
-The tab talks to the host through the `backupPanel` Typert Remote namespace
-(`/api` RPC); the browser bundle ships prebuilt in `lib/client.js` — no build
-step at install time.
+The overview card lets you **edit** the backup destination, the default retention
+count, and the exclude patterns inline — saving writes them to the active
+profile's `cordis.patch.yml` and takes effect immediately. Downloads stream from
+the loopback-only route `GET /backup-download/<name>`. The tab talks to the host
+through the `backupPanel` Typert Remote namespace (`/api` RPC); the browser
+bundle ships prebuilt in `lib/client.js` — no build step at install time.
 
 ## How restore works
 

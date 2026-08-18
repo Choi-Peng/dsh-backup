@@ -22,6 +22,7 @@ function mb(size, t) {
 export function BackupTab({ panel, t }) {
   const [snap, setSnap] = useState(null);
   const [github, setGithub] = useState(null);
+  const [config, setConfig] = useState(null);
   const [failed, setFailed] = useState(false);
   const [request, setRequest] = useState(0);
   const [busy, setBusy] = useState('');
@@ -30,17 +31,24 @@ export function BackupTab({ panel, t }) {
   const [pending, setPending] = useState(null);
   const [repoInput, setRepoInput] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [destInput, setDestInput] = useState('');
+  const [keepInput, setKeepInput] = useState('');
+  const [excludeInput, setExcludeInput] = useState('');
 
   const reload = () => { setRequest(v => v + 1); };
 
   useEffect(() => {
     let current = true;
     setFailed(false);
-    void Promise.all([panel.status(), panel.githubStatus()]).then(
-      ([snapshot, gh]) => {
+    void Promise.all([panel.status(), panel.githubStatus(), panel.config()]).then(
+      ([snapshot, gh, cfg]) => {
         if (current) {
           setSnap(snapshot);
           setGithub(gh);
+          setConfig(cfg);
+          setDestInput(cfg.destination || '');
+          setKeepInput(String(cfg.keep ?? 7));
+          setExcludeInput((cfg.exclude || []).join('\n'));
           if (gh.repoRaw !== null) setRepoInput(gh.repoRaw);
         }
       },
@@ -73,6 +81,16 @@ export function BackupTab({ panel, t }) {
   const deleteOne = (name) => {
     setConfirmDelete(null);
     void run(`delete:${name}`, () => panel.deleteBackup(name)).then(reload);
+  };
+
+  const saveConfig = () => {
+    const keep = Number(keepInput);
+    const exclude = excludeInput.split('\n').map((s) => s.trim()).filter((s) => s.length > 0);
+    void run('config', () => panel.setConfig({
+      destination: destInput.trim(),
+      keep: Number.isFinite(keep) && keep > 0 ? Math.floor(keep) : undefined,
+      exclude,
+    })).then(reload);
   };
 
   const previewRestore = (name) => {
@@ -124,12 +142,56 @@ export function BackupTab({ panel, t }) {
               <dt>{t('dshHome')}</dt>
               <dd>{snap.dshHome}</dd>
               <dt>{t('destination')}</dt>
-              <dd>{snap.destination}</dd>
+              <dd>
+                <div className="dsb-row" style={{ rowGap: '6px' }}>
+                  <input
+                    type="text" value={destInput}
+                    onChange={(e) => setDestInput(e.target.value)}
+                    style={{ width: '24em' }}
+                    aria-label={t('destination')}
+                  />
+                  <span className="dsb-status">{t('effectiveDest').replace('{path}', snap.destination)}</span>
+                </div>
+              </dd>
               <dt>{t('keepDefault')}</dt>
-              <dd>{snap.keepDefault} {t('copies')}</dd>
+              <dd>
+                <div className="dsb-row" style={{ rowGap: '6px' }}>
+                  <input
+                    type="number" min="1" value={keepInput}
+                    onChange={(e) => setKeepInput(e.target.value)}
+                    style={{ width: '6em' }}
+                    aria-label={t('keepDefault')}
+                  />
+                  <span className="dsb-status">{t('copies')}</span>
+                </div>
+              </dd>
+              <dt>{t('exclude')}</dt>
+              <dd>
+                <textarea
+                  rows={Math.max(2, (excludeInput.match(/\n/g) || []).length + 1)}
+                  value={excludeInput}
+                  onChange={(e) => setExcludeInput(e.target.value)}
+                  placeholder={t('excludePlaceholder')}
+                  style={{ width: '24em', font: 'inherit', fontSize: 13, padding: '6px 10px', border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 8, color: 'inherit', background: 'var(--dsw-alias-bg-layer-2)', resize: 'vertical' }}
+                  aria-label={t('exclude')}
+                />
+                {config !== null && config.source !== 'default' ? (
+                  <p className="dsb-status">{t('configSource').replace('{source}', config.source)}</p>
+                ) : null}
+              </dd>
               <dt>{t('lastAuto')}</dt>
               <dd>{snap.lastAuto ?? t('none')}</dd>
             </dl>
+            <div className="dsb-row">
+              <button
+                type="button" className="dsb-btn-secondary"
+                disabled={busy !== '' || destInput.trim() === ''}
+                onClick={saveConfig}
+              >
+                {busy === 'config' ? t('busy') : t('saveConfig')}
+              </button>
+              <span className="dsb-status">{t('configHint')}</span>
+            </div>
             <div className="dsb-divider" />
             <div className="dsb-row">
               {snap.autoHours > 0 ? (

@@ -53,6 +53,12 @@ export const zh = {
   clear: '清除',
   delete: '删除',
   confirmDelete: '确认删除？',
+  exclude: '排除项',
+  excludePlaceholder: '每行一个路径，例如：\n.cache\n*.log',
+  saveConfig: '保存配置',
+  effectiveDest: '当前生效：{path}',
+  configHint: '修改会写入 profile 的 cordis.patch.yml 并即时生效。',
+  configSource: '来源：{source}',
 };
 
 export const en = {
@@ -106,4 +112,10 @@ export const en = {
   clear: 'Clear',
   delete: 'Delete',
   confirmDelete: 'Confirm delete?',
+  exclude: 'Exclude',
+  excludePlaceholder: 'One path per line, e.g.:\n.cache\n*.log',
+  saveConfig: 'Save config',
+  effectiveDest: 'Currently: {path}',
+  configHint: 'Changes are written to the profile\'s cordis.patch.yml and take effect immediately.',
+  configSource: 'Source: {source}',
 };

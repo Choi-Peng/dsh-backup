@@ -97,11 +97,42 @@ const setGithubRepoSchema = z.object({
   summary: z.string(),
 });
 
+const configSchema = z.object({
+  destination: z.string(),
+  keep: z.number().int(),
+  exclude: z.array(z.string()),
+  source: z.string(),
+  patchFile: z.string().nullable(),
+});
+
+const setConfigSchema = z.object({
+  ok: z.boolean(),
+  summary: z.string(),
+  mode: z.string().optional(),
+  config: configSchema.optional(),
+  fields: z.array(z.string()).optional(),
+});
+
 const keepParam = { name: 'keep', wire: 'keep', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#keep', schema: z.number().int().positive().optional() }, acceptsUndefined: true };
 const selectorParam = { name: 'selector', wire: 'selector', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#selector', schema: z.string().optional() }, acceptsUndefined: true };
 const dryRunParam = { name: 'dryRun', wire: 'dryRun', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#dryRun', schema: z.boolean().optional() }, acceptsUndefined: true };
 const hoursParam = { name: 'hours', wire: 'hours', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#hours', schema: z.number().int().min(0).max(720) }, acceptsUndefined: true };
 const repoParam = { name: 'repo', wire: 'repo', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#repo', schema: z.string().optional() }, acceptsUndefined: true };
+const configParam = {
+  name: 'config',
+  wire: 'config',
+  source: 'json',
+  codec: {
+    mode: 'strict',
+    typeSymbol: 'dsh-backup/types#configPatch',
+    schema: z.object({
+      destination: z.string().optional(),
+      keep: z.number().int().positive().optional(),
+      exclude: z.array(z.string()).optional(),
+    }).optional(),
+  },
+  acceptsUndefined: true,
+};
 
 function strictDescriptor(method, parameters, schema, cancellation) {
   return Object.freeze({
@@ -133,6 +164,8 @@ export const BACKUP_REMOTE = Object.freeze({
     strictDescriptor('githubSyncNow', [], githubSyncSchema, true),
     strictDescriptor('deleteBackup', [selectorParam], removeSchema, true),
     strictDescriptor('setGithubRepo', [repoParam], setGithubRepoSchema, false),
+    strictDescriptor('config', [], configSchema, false),
+    strictDescriptor('setConfig', [configParam], setConfigSchema, false),
   ]),
 });
 
@@ -167,6 +200,8 @@ export async function apply(ctx) {
       githubSyncNow: async () => unwrap(await ns().githubSyncNow()),
       deleteBackup: async (selector) => unwrap(await ns().deleteBackup(selector)),
       setGithubRepo: async (repo) => unwrap(await ns().setGithubRepo(repo)),
+      config: async () => unwrap(await ns().config()),
+      setConfig: async (config) => unwrap(await ns().setConfig(config)),
     };
     scope.slots.inject('settings.plugins.tab', () => scope.slots.register({
       name: 'settings.plugins.tab',

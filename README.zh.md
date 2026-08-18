@@ -39,7 +39,9 @@ credential 文件（不进进程参数）。推送为 `HEAD:main --force-with-le
 
 同样的能力在 `dsh web` 的 **Settings → Plugins → 备份** 标签页有可视化入口：
 显示备份目录、自动备份状态、GitHub 同步状态和每份归档的大小，支持一键立即
-备份、逐份校验、**下载**、带 dry-run 预览与二次确认的恢复。下载走仅限本机的
+备份、逐份校验、**下载**、带 dry-run 预览与二次确认的恢复。总览卡中的备份
+目录、默认保留份数与排除项可**直接编辑**，保存后写入当前 profile 的
+`cordis.patch.yml` 并立即生效（无需手改配置或重启）。下载走仅限本机的
 `GET /backup-download/<归档名>` 路由。面板经 `backupPanel` Typert Remote
 命名空间（`/api` RPC）与宿主通信；浏览器 bundle 预构建在 `lib/client.js`，
 安装时无需构建。
