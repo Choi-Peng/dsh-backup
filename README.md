@@ -1,4 +1,6 @@
-# dsh-backup
+# @choi-p/dsh-backup
+
+> **Fork of [xiaoyuyu6420/dsh-backup](https://github.com/xiaoyuyu6420/dsh-backup)**, independently maintained and refactored version.
 
 [![dsh-plugin](https://img.shields.io/badge/ecosystem-dsh--plugin-8b5cf6)](https://github.com/topics/dsh-plugin)
 
@@ -27,7 +29,7 @@ deletions stay in sync:
 
 ```yaml
 - id: dsh-backup
-  name: 'dsh-backup'
+  name: '@choi-p/dsh-backup'
   config:
     githubRepo: 'your-name/dsh-backups'   # owner/repo, full URL, or a local path
 ```
@@ -69,7 +71,7 @@ Plugin `config` in the active cordis profile:
 
 ```yaml
 - id: dsh-backup
-  name: 'dsh-backup'
+  name: '@choi-p/dsh-backup'
   config:
     destination: '~/Backups/dsh'   # default ~/Desktop/dsh-backups
     keep: 10                       # default rotation count
@@ -95,7 +97,7 @@ does not apply to host-owned storage.
 ## Install
 
 ```sh
-dsh plugin --profile web add dsh-backup
+dsh plugin --profile web add @choi-p/dsh-backup
 ```
 
 Then restart `dsh web` (plugin discovery is cached per process) and run `/backup`,
@@ -106,7 +108,7 @@ or open Settings → Plugins → Backup.
 - macOS, Linux, or Windows 10+ with `tar` in PATH (Windows ships bsdtar in
   System32; Git Bash's GNU tar also works — checksums prefer `sha256sum`/`shasum`
   and fall back to an in-process hash on Windows)
-- DSH `0.1.0-rc.6` or compatible
+- DSH `>= 0.1.0-rc.7` (settings service)
 
 ## Development
 
@@ -122,4 +124,4 @@ node scripts/smoke-client.mjs   # client bundle: handshake, schemas, tab registr
 
 ## License
 
-MIT
+MIT — forked from [xiaoyuyu6420/dsh-backup](https://github.com/xiaoyuyu6420/dsh-backup)

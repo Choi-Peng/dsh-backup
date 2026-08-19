@@ -1,4 +1,6 @@
-# dsh-backup
+# @choi-p/dsh-backup
+
+> **Fork of [xiaoyuyu6420/dsh-backup](https://github.com/xiaoyuyu6420/dsh-backup)**，独立维护/重构版本。
 
 [![dsh-plugin](https://img.shields.io/badge/ecosystem-dsh--plugin-8b5cf6)](https://github.com/topics/dsh-plugin)
 
@@ -24,7 +26,7 @@
 
 ```yaml
 - id: dsh-backup
-  name: 'dsh-backup'
+  name: '@choi-p/dsh-backup'
   config:
     githubRepo: '你的账号/dsh-backups'   # owner/repo、完整 URL 或本地路径
 ```
@@ -63,7 +65,7 @@ credential 文件（不进进程参数）。推送为 `HEAD:main --force-with-le
 
 ```yaml
 - id: dsh-backup
-  name: 'dsh-backup'
+  name: '@choi-p/dsh-backup'
   config:
     destination: '~/Backups/dsh'   # 默认 ~/Desktop/dsh-backups
     keep: 10                       # 默认轮换保留份数
@@ -87,7 +89,7 @@ credential 文件（不进进程参数）。推送为 `HEAD:main --force-with-le
 ## 安装
 
 ```sh
-dsh plugin --profile web add dsh-backup
+dsh plugin --profile web add @choi-p/dsh-backup
 ```
 
 然后重启 `dsh web`（插件发现按进程缓存），输入 `/backup` 或打开
@@ -98,7 +100,7 @@ Settings → Plugins → 备份。
 - macOS、Linux 或 Windows 10+，PATH 中有 `tar`（Windows 自带 System32 的
   bsdtar，Git Bash 的 GNU tar 也可以；校验和优先 `sha256sum`/`shasum`，
   Windows 上回退进程内哈希）
-- DSH `0.1.0-rc.6` 或兼容版本
+- DSH `>= 0.1.0-rc.7`（settings 服务）
 
 ## 开发
 
@@ -114,4 +116,4 @@ node scripts/smoke-client.mjs   # 客户端 bundle：握手/schema/标签页注�
 
 ## 许可证
 
-MIT
+MIT — forked from [xiaoyuyu6420/dsh-backup](https://github.com/xiaoyuyu6420/dsh-backup)
