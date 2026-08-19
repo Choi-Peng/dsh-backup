@@ -107,8 +107,43 @@ function makeCtx({ home, dsh }) {
       intervals.push({ fn, ms });
       return () => {};
     },
-    // cordis Context.inject 的桩：typert / webServer 存在时立即激活作用域回调。
+    // cordis Context.inject 的桩：typert / webServer / settings 存在时立即激活作用域回调。
     inject: (names, callback) => {
+      if (names.includes('settings')) {
+        // settings 服务桩：register 返回 scope，get 返回 base
+        const registrations = new Map();
+        const scope = {
+          settings: {
+            register: (ns, schema, options) => {
+              const base = options?.base ?? {};
+              const resolved = schema(base);
+              const reg = { resolved, revision: 0, watchers: new Set() };
+              registrations.set(ns, reg);
+              return {
+                get: () => reg.resolved,
+                watch: () => () => {},
+                update: async (patch) => {
+                  // 简单合并 patch
+                  for (const [k, v] of Object.entries(patch)) {
+                    if (v !== undefined) reg.resolved = { ...reg.resolved, [k]: v };
+                  }
+                  reg.revision += 1;
+                },
+                replace: async (section) => { reg.resolved = { ...section }; reg.revision += 1; },
+              };
+            },
+            describe: (opts) => {
+              const list = [];
+              for (const [ns, reg] of registrations) {
+                list.push({ ns, value: reg.resolved, revision: reg.revision, base: reg.resolved });
+              }
+              return list;
+            },
+            get documentPath() { return null; },
+          },
+        };
+        callback(scope);
+      }
       if (names.includes('typert')) {
         const scope = {
           typert: { register: (c) => { typertContribs.push(c); return () => {}; } },

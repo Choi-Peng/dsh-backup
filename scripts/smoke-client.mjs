@@ -90,6 +90,8 @@ async function main() {
     'backupPanel/githubSyncNow': { ok: true, summary: '无变更', pushed: false, tooBig: [] },
     'backupPanel/deleteBackup': { ok: true, summary: '已删除备份: dsh-x.tar.gz' },
     'backupPanel/setGithubRepo': { ok: true, repo: 'u/backups', summary: '已设为 u/backups' },
+    'backupPanel/config': { destination: '~/Desktop/dsh-backups', keep: 7, exclude: [], source: 'config', settingsFile: null },
+    'backupPanel/setConfig': { ok: true, summary: '已写入 settings.yaml', config: { destination: '~/Desktop/dsh-backups', keep: 7, exclude: [], source: 'settings', settingsFile: null } },
   };
   for (const d of contribution.descriptors) {
     const key = `${d.namespace}/${d.method}`;

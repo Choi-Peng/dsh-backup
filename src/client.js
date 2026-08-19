@@ -102,7 +102,7 @@ const configSchema = z.object({
   keep: z.number().int(),
   exclude: z.array(z.string()),
   source: z.string(),
-  patchFile: z.string().nullable(),
+  settingsFile: z.string().nullable().optional(),
 });
 
 const setConfigSchema = z.object({
