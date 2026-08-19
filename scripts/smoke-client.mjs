@@ -32,7 +32,7 @@ async function main() {
   globalThis.window = { __ModuleLoader__: { load: (e) => { entry = e; } } };
   const bundle = await readFile(path.join(REPO, 'lib', 'client.js'), 'utf8');
   new Function(bundle)(); // bundle 顶层只声明 var 并调用 window.__ModuleLoader__.load
-  ok(entry !== undefined && entry.id === 'dsh-backup', `bundle 以 id=${entry?.id} 注册`);
+  ok(entry !== undefined && entry.id === '@choi-p/dsh-backup', `bundle 以 id=${entry?.id} 注册`);
 
   const requireShim = (id) => {
     if (id === 'react') return require('react');
@@ -40,7 +40,7 @@ async function main() {
     throw new Error(`意外的外部依赖: ${id}`);
   };
   const plugin = entry.factory(requireShim);
-  ok(plugin.name === 'dsh-backup' && JSON.stringify(plugin.inject) === JSON.stringify(['slots', 'locale', 'remote']), `插件导出面正确: ${plugin.name}`);
+  ok(plugin.name === '@choi-p/dsh-backup' && JSON.stringify(plugin.inject) === JSON.stringify(['slots', 'locale', 'remote']), `插件导出面正确: ${plugin.name}`);
 
   console.log('2) apply() 挂载（字典 / Remote 贡献 / 标签页）');
   const dict = {};
@@ -70,7 +70,7 @@ async function main() {
   ok(dict['settings.backupPanel']?.zh?.tab === '备份' && dict['settings.backupPanel']?.en?.tab === 'Backup', '双语文典已注册');
 
   const contribution = contributions[0];
-  ok(contribution?.package === 'dsh-backup' && contribution.descriptors.length === 9, `Remote 贡献含 ${contribution?.descriptors.length} 个端点`);
+  ok(contribution?.package === '@choi-p/dsh-backup' && contribution.descriptors.length === 9, `Remote 贡献含 ${contribution?.descriptors.length} 个端点`);
 
   const endpoints = contribution.descriptors.map((d) => `${d.namespace}/${d.method}`);
   ok(JSON.stringify(endpoints) === JSON.stringify(['backupPanel/status', 'backupPanel/backup', 'backupPanel/verify', 'backupPanel/restore', 'backupPanel/setAuto', 'backupPanel/githubStatus', 'backupPanel/githubSyncNow', 'backupPanel/deleteBackup', 'backupPanel/setGithubRepo']), `端点与宿主半边一致: ${endpoints.join(', ')}`);

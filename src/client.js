@@ -17,7 +17,7 @@ import { installPanelStyles } from './styles.js';
 export const NS = 'settings.backupPanel';
 
 /** 插件名：与包名、cordis.yml 行 id、bundle id 一致。 */
-export const name = 'dsh-backup';
+export const name = '@choi-p/dsh-backup';
 
 /** 标签页读取的服务；`remote.backupPanel` 随本插件挂载贡献后出现。 */
 export const inject = ['slots', 'locale', 'remote'];
@@ -113,18 +113,18 @@ const setConfigSchema = z.object({
   fields: z.array(z.string()).optional(),
 });
 
-const keepParam = { name: 'keep', wire: 'keep', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#keep', schema: z.number().int().positive().optional() }, acceptsUndefined: true };
-const selectorParam = { name: 'selector', wire: 'selector', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#selector', schema: z.string().optional() }, acceptsUndefined: true };
-const dryRunParam = { name: 'dryRun', wire: 'dryRun', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#dryRun', schema: z.boolean().optional() }, acceptsUndefined: true };
-const hoursParam = { name: 'hours', wire: 'hours', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#hours', schema: z.number().int().min(0).max(720) }, acceptsUndefined: true };
-const repoParam = { name: 'repo', wire: 'repo', source: 'json', codec: { mode: 'strict', typeSymbol: 'dsh-backup/types#repo', schema: z.string().optional() }, acceptsUndefined: true };
+const keepParam = { name: 'keep', wire: 'keep', source: 'json', codec: { mode: 'strict', typeSymbol: '@choi-p/dsh-backup/types#keep', schema: z.number().int().positive().optional() }, acceptsUndefined: true };
+const selectorParam = { name: 'selector', wire: 'selector', source: 'json', codec: { mode: 'strict', typeSymbol: '@choi-p/dsh-backup/types#selector', schema: z.string().optional() }, acceptsUndefined: true };
+const dryRunParam = { name: 'dryRun', wire: 'dryRun', source: 'json', codec: { mode: 'strict', typeSymbol: '@choi-p/dsh-backup/types#dryRun', schema: z.boolean().optional() }, acceptsUndefined: true };
+const hoursParam = { name: 'hours', wire: 'hours', source: 'json', codec: { mode: 'strict', typeSymbol: '@choi-p/dsh-backup/types#hours', schema: z.number().int().min(0).max(720) }, acceptsUndefined: true };
+const repoParam = { name: 'repo', wire: 'repo', source: 'json', codec: { mode: 'strict', typeSymbol: '@choi-p/dsh-backup/types#repo', schema: z.string().optional() }, acceptsUndefined: true };
 const configParam = {
   name: 'config',
   wire: 'config',
   source: 'json',
   codec: {
     mode: 'strict',
-    typeSymbol: 'dsh-backup/types#configPatch',
+    typeSymbol: '@choi-p/dsh-backup/types#configPatch',
     schema: z.object({
       destination: z.string().optional(),
       keep: z.number().int().positive().optional(),
@@ -136,14 +136,14 @@ const configParam = {
 
 function strictDescriptor(method, parameters, schema, cancellation) {
   return Object.freeze({
-    id: `dsh-backup#backupPanel/${method}`,
+    id: `@choi-p/dsh-backup#backupPanel/${method}`,
     service: 'backupPanel',
     namespace: 'backupPanel',
     method,
     invocation: Object.freeze({ kind: 'direct' }),
     parameters: Object.freeze(parameters.map((p) => Object.freeze({ ...p, codec: Object.freeze(p.codec) }))),
     ...(cancellation ? { cancellation: Object.freeze({ parameter: 'signal' }) } : {}),
-    result: Object.freeze({ mode: 'strict', typeSymbol: `dsh-backup/types#${method}Result`, schema }),
+    result: Object.freeze({ mode: 'strict', typeSymbol: `@choi-p/dsh-backup/types#${method}Result`, schema }),
   });
 }
 
@@ -153,7 +153,7 @@ function strictDescriptor(method, parameters, schema, cancellation) {
  * 挂载校验强制 strict），宿主为 src-json——两端按同一 wire 契约工作。
  */
 export const BACKUP_REMOTE = Object.freeze({
-  package: 'dsh-backup',
+  package: '@choi-p/dsh-backup',
   descriptors: Object.freeze([
     strictDescriptor('status', [], statusSchema, false),
     strictDescriptor('backup', [keepParam], backupSchema, true),
@@ -182,8 +182,8 @@ function unwrap(result) {
  * @param ctx - 客户端根上下文。
  */
 export async function apply(ctx) {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-backup: dictionaries');
-  ctx.effect(() => installPanelStyles(), 'dsh-backup: stylesheet');
+  ctx.effect(() => ctx.locale.register(NS, { zh, en }), '@choi-p/dsh-backup: dictionaries');
+  ctx.effect(() => installPanelStyles(), '@choi-p/dsh-backup: stylesheet');
 
   await ctx.remote.$mount(BACKUP_REMOTE);
 

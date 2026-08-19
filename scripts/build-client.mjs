@@ -12,7 +12,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const PLUGIN_ID = 'dsh-backup';
+const PLUGIN_ID = '@choi-p/dsh-backup';
 
 /** shell 冻结模块表共享的包（packages/client/web/src/platform.ts）；表外一律内联。 */
 const PLATFORM_EXTERNALS = [
