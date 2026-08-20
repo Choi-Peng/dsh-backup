@@ -45,7 +45,7 @@ credential 文件（不进进程参数）。推送为 `HEAD:main --force-with-le
 目录、默认保留份数与排除项可**直接编辑**，保存后写入当前 profile 的
 `cordis.patch.yml` 并立即生效（无需手改配置或重启）。下载走仅限本机的
 `GET /backup-download/<归档名>` 路由。面板经 `backupPanel` Typert Remote
-命名空间（`/api` RPC）与宿主通信；浏览器 bundle 预构建在 `lib/client.js`，
+命名空间（`/api` RPC）与宿主通信；浏览器 bundle 手写在 `lib/client.js`，
 安装时无需构建。
 
 ## 恢复的工作方式
@@ -104,15 +104,16 @@ Settings → Plugins → 备份。
 
 ## 开发
 
-运行时零依赖——宿主插件就是 `lib/index.js`。浏览器半边源码在 `src/`，
-打包（zod 内联、React/Cordis 保持 external）产物 `lib/client.js` 提交进仓库，
-git 安装无需构建：
+零构建、零第三方依赖——全部功能为手写纯 JavaScript，直接放在 `lib/`
+（仅使用 `@deepseek-ai/*` 平台包）：
 
-```sh
-node scripts/build-client.mjs   # 改 src/ 后重新打包客户端
-node scripts/smoke.mjs          # 宿主冒烟（真实临时目录 + 模拟 DSH 服务）
-node scripts/smoke-client.mjs   # 客户端 bundle：握手/schema/标签页注册/SSR
-```
+- `lib/index.js` —— 宿主半边：`/backup` 命令、`backup_dsh` 工具、
+  `backupPanel` Typert Remote 服务、仅限本机的下载路由与定时备份。
+- `lib/client.js` —— 浏览器半边：手写 Web bundle（无 JSX、无打包器），
+  遵循 shell 的 `window.__ModuleLoader__` 握手；React 运行时从 shell 模块表
+  解析；typert strict codec 用内联极简校验器替代 zod。
+
+没有 `src/` 和 `scripts/`——直接改 `lib/` 下的文件即可。
 
 ## 许可证
 

@@ -52,7 +52,7 @@ count, and the exclude patterns inline — saving writes them to the active
 profile's `cordis.patch.yml` and takes effect immediately. Downloads stream from
 the loopback-only route `GET /backup-download/<name>`. The tab talks to the host
 through the `backupPanel` Typert Remote namespace (`/api` RPC); the browser
-bundle ships prebuilt in `lib/client.js` — no build step at install time.
+bundle is hand-written in `lib/client.js` — no build step at install time.
 
 ## How restore works
 
@@ -112,15 +112,18 @@ or open Settings → Plugins → Backup.
 
 ## Development
 
-Zero runtime dependencies — the host plugin is `lib/index.js`. The browser half
-lives in `src/` and is bundled (zod inlined, React/Cordis external) into
-`lib/client.js`, which is committed so git installs never build:
+Zero build step and zero third-party dependencies — everything is hand-written
+plain JavaScript in `lib/` (only `@deepseek-ai/*` platform packages are used):
 
-```sh
-node scripts/build-client.mjs   # rebuild the client bundle after editing src/
-node scripts/smoke.mjs          # host smoke suite (real temp dir, mocked DSH services)
-node scripts/smoke-client.mjs   # client bundle: handshake, schemas, tab registration, SSR
-```
+- `lib/index.js` — host half: `/backup` command, `backup_dsh` tool, the
+  `backupPanel` Typert Remote service, the loopback download route, and the
+  auto-backup timer.
+- `lib/client.js` — browser half: a hand-written Web bundle (no JSX, no
+  bundler) wrapped in the shell's `window.__ModuleLoader__` handshake. React is
+  resolved at runtime from the shell's module table; the typert strict codecs
+  use a tiny inline validator instead of zod.
+
+There is no `src/` and no `scripts/` — edit the files under `lib/` directly.
 
 ## License
 
