@@ -1,125 +1,124 @@
 # dsh-backup
 
+> **Fork of [xiaoyuyu6420/dsh-backup](https://github.com/xiaoyuyu6420/dsh-backup)**，独立维护/重构版本。
+
+![version](https://img.shields.io/badge/version-0.1.0-3478f6?style=flat-square)
+![license](https://img.shields.io/badge/license-MIT-10b981?style=flat-square)
+![platform](https://img.shields.io/badge/platform-web-7c3aed?style=flat-square)
+![node](https://img.shields.io/badge/node-%3E%3D20-334155?style=flat-square)
 [![dsh-plugin](https://img.shields.io/badge/ecosystem-dsh--plugin-8b5cf6)](https://github.com/topics/dsh-plugin)
 
-One-command backup **and restore** for DeepSeek Harness user data — sessions,
-settings, credentials, skills, and plugin config under `~/.dsh`, excluding
-reinstallable `node_modules` — with sha256 checksums, integrity verification,
-automatic rotation, and scheduled auto-backup that survives restarts. Works on
-macOS, Linux, and Windows.
+一键备份**与恢复** DeepSeek Harness 用户数据——`~/.dsh` 下的会话、设置、凭据、
+技能与插件配置（排除可重装的 node_modules），自动生成 sha256 校验和、完整性
+校验、自动轮换，定时自动备份状态落盘、重启续跑。支持 macOS / Linux / Windows。
 
-## Commands
+## 命令
 
-- **`/backup`** — immediately back up `~/.dsh` to `~/Desktop/dsh-backups/dsh-<timestamp>.tar.gz`
-- **`/backup list`** — list existing backups (name + size) and auto-backup status
-- **`/backup verify [prefix|all]`** — validate archive checksums (default: the newest)
-- **`/backup restore <prefix|latest> [--dry-run]`** — restore `~/.dsh` from an archive
-- **`/backup auto <N>|off|status`** — auto-backup every N hours (1–720; keeps 3 copies below 24h, 7 otherwise; persisted across restarts)
-- **`/backup --keep N`** — override the rotation count (default 7)
-- **`/backup github status|sync`** — GitHub sync status / push now
-- **`backup_dsh` tool** — same capability for the model (`mode=backup|list|verify|restore|auto`)
+- **`/backup`** —— 立即备份 `~/.dsh` 到 `~/Desktop/dsh-backups/dsh-<时间戳>.tar.gz`
+- **`/backup list`** —— 列出已有备份（名称 + 大小）与自动备份状态
+- **`/backup verify [前缀|all]`** —— 校验归档完整性（缺省校验最新一份）
+- **`/backup restore <前缀|latest> [--dry-run]`** —— 从归档恢复 `~/.dsh`
+- **`/backup auto <N小时>|off|status`** —— 每 N 小时自动备份（1~720；<24h 保留 3 份，否则 7 份；状态持久化，重启续跑）
+- **`/backup --keep N`** —— 覆盖轮换保留份数（默认 7）
+- **`/backup github status|sync`** —— GitHub 同步状态 / 立即推送
+- **`backup_dsh` 工具** —— 模型可调用同一能力（`mode=backup|list|verify|restore|auto`）
 
-## GitHub sync
+## GitHub 同步
 
-With `config.githubRepo` set, every backup (manual, automatic, or panel) is
-also pushed to a Git repository — archives, checksum sidecars, and rotation
-deletions stay in sync:
+配置 `config.githubRepo` 后，每次备份（手动 / 定时 / 面板）都会把归档、校验
+边车与轮换删除一并推送到 Git 仓库：
 
 ```yaml
 - id: dsh-backup
-  name: 'dsh-backup'
+  name: '@choi-p/dsh-backup'
   config:
-    githubRepo: 'your-name/dsh-backups'   # owner/repo, full URL, or a local path
+    githubRepo: '你的账号/dsh-backups'   # owner/repo、完整 URL 或本地路径
 ```
 
-Use a **private** repository — archives contain plaintext credentials. For an
-`https` remote, set the token in the environment (`DSH_BACKUP_GITHUB_TOKEN` or
-`GITHUB_TOKEN`); it is only written into the sync worktree's credential file
-(never process args). Push is `HEAD:main --force-with-lease`; archives over
-90 MB are skipped with a notice. State (last push, last error) lives in
-`<destination>/auto.json` and shows in the panel and `/backup github status`.
+**请使用私有仓库**——归档含明文凭据。https 远端需要环境变量 token
+（`DSH_BACKUP_GITHUB_TOKEN` 或 `GITHUB_TOKEN`），token 只写入同步工作树的
+credential 文件（不进进程参数）。推送为 `HEAD:main --force-with-lease`；
+超过 90MB 的归档会跳过并提示。同步状态（上次推送 / 错误）存于
+`<destination>/auto.json`，面板与 `/backup github status` 可见。
 
-## Settings panel (Web)
+## Settings 可视面板（Web）
 
-The same controls have a visual entry: a **Backup** tab inside Settings → Plugins
-(`dsh web`). It shows the destination, auto-backup state, GitHub sync status, and
-every archive with its size, and offers one-click back-up-now, per-archive
-verify, download, and restore with a dry-run preview plus explicit confirmation.
-The overview card lets you **edit** the backup destination, the default retention
-count, and the exclude patterns inline — saving writes them to the active
-profile's `cordis.patch.yml` and takes effect immediately. Downloads stream from
-the loopback-only route `GET /backup-download/<name>`. The tab talks to the host
-through the `backupPanel` Typert Remote namespace (`/api` RPC); the browser
-bundle ships prebuilt in `lib/client.js` — no build step at install time.
+同样的能力在 `dsh web` 的 **Settings → Plugins → 备份** 标签页有可视化入口：
+显示备份目录、自动备份状态、GitHub 同步状态和每份归档的大小，支持一键立即
+备份、逐份校验、**下载**、带 dry-run 预览与二次确认的恢复。总览卡中的备份
+目录、默认保留份数与排除项可**直接编辑**，保存后写入当前 profile 的
+`cordis.patch.yml` 并立即生效（无需手改配置或重启）。下载走仅限本机的
+`GET /backup-download/<归档名>` 路由。面板经 `backupPanel` Typert Remote
+命名空间（`/api` RPC）与宿主通信；浏览器 bundle 手写在 `lib/client.js`，
+安装时无需构建。
 
-## How restore works
+## 恢复的工作方式
 
-Restore is safe by construction:
+恢复安全性是设计出来的：
 
-1. The archive's sha256 is verified first — a corrupt archive never touches existing data.
-2. Entries are listed and any path outside the backup root rejects the restore (tar path-traversal guard).
-3. The current `~/.dsh` is snapshotted, then moved aside to `~/.dsh.pre-restore-<timestamp>` — restore replaces rather than merges.
-4. The archive is extracted; restart `dsh` afterwards so restored sessions and settings take effect.
+1. 先校验归档 sha256——损坏的归档绝不触碰现有数据。
+2. 列出归档条目，任何超出备份根目录的路径都会拒绝恢复（tar 路径穿越防护）。
+3. 当前 `~/.dsh` 先自动快照，再移动到 `~/.dsh.pre-restore-<时间戳>`——恢复是替换而不是合并。
+4. 解压归档后重启 `dsh`，恢复的会话与配置即生效。
 
-`--dry-run` shows the archive summary without writing anything.
+`--dry-run` 只显示归档概要，不写入任何内容。
 
-## Configuration (optional)
+## 配置（可选）
 
-Plugin `config` in the active cordis profile:
+在生效的 cordis profile 中为插件声明 `config`：
 
 ```yaml
 - id: dsh-backup
-  name: 'dsh-backup'
+  name: '@choi-p/dsh-backup'
   config:
-    destination: '~/Backups/dsh'   # default ~/Desktop/dsh-backups
-    keep: 10                       # default rotation count
-    exclude:                       # extra tar --exclude patterns
+    destination: '~/Backups/dsh'   # 默认 ~/Desktop/dsh-backups
+    keep: 10                       # 默认轮换保留份数
+    exclude:                       # 额外的 tar --exclude 模式
       - '*cache*'
-    githubRepo: 'name/dsh-backups' # optional GitHub sync (see below)
+    githubRepo: '账号/dsh-backups' # 可选 GitHub 同步（见下文）
 ```
 
-Auto-backup state lives in `<destination>/auto.json` and resumes after restart.
+自动备份状态保存在 `<destination>/auto.json`，重启后续跑。
 
-## Security note
+## 安全说明
 
-Backups contain plaintext credentials (`.credentials.yaml`, `qq-bridge/config.json`).
-Archives and checksum sidecars are chmod 600 on POSIX (Windows relies on
-per-user profile ACLs), but do **not** sync the backup directory to untrusted
-locations, and treat archives as sensitive as your API keys.
+备份包含明文凭据（`.credentials.yaml`、`qq-bridge/config.json`）。归档与校验
+文件在 POSIX 上为 `chmod 600`（Windows 依赖用户目录 ACL），但请**不要**把备份
+目录同步到不受信的位置，并像对待 API key 一样对待备份文件。
 
-Storage note: the plugin writes its own data (archives, checksum sidecars,
-`auto.json`) directly through `node:fs`, the same pattern as DSH's own session
-persistence — the `ctx.fs` capability is the model-facing sandboxed surface and
-does not apply to host-owned storage.
+存储说明：插件自有数据（归档、校验和、`auto.json`）直接经 `node:fs` 写入，
+与 DSH 自身的会话持久化同一模式——`ctx.fs` 能力是模型面的沙箱 surface，
+不适用于宿主插件的自有存储。
 
-## Install
+## 安装
 
 ```sh
-dsh plugin --profile web add dsh-backup
+dsh plugin --profile web add @choi-p/dsh-backup
 ```
 
-Then restart `dsh web` (plugin discovery is cached per process) and run `/backup`,
-or open Settings → Plugins → Backup.
+然后重启 `dsh web`（插件发现按进程缓存），输入 `/backup` 或打开
+Settings → Plugins → 备份。
 
-## Requirements
+## 依赖
 
-- macOS, Linux, or Windows 10+ with `tar` in PATH (Windows ships bsdtar in
-  System32; Git Bash's GNU tar also works — checksums prefer `sha256sum`/`shasum`
-  and fall back to an in-process hash on Windows)
-- DSH `0.1.0-rc.6` or compatible
+- macOS、Linux 或 Windows 10+，PATH 中有 `tar`（Windows 自带 System32 的
+  bsdtar，Git Bash 的 GNU tar 也可以；校验和优先 `sha256sum`/`shasum`，
+  Windows 上回退进程内哈希）
+- DSH `>= 0.1.0-rc.7`（settings 服务）
 
-## Development
+## 开发
 
-Zero runtime dependencies — the host plugin is `lib/index.js`. The browser half
-lives in `src/` and is bundled (zod inlined, React/Cordis external) into
-`lib/client.js`, which is committed so git installs never build:
+零构建、零第三方依赖——全部功能为手写纯 JavaScript，直接放在 `lib/`
+（仅使用 `@deepseek-ai/*` 平台包）：
 
-```sh
-node scripts/build-client.mjs   # rebuild the client bundle after editing src/
-node scripts/smoke.mjs          # host smoke suite (real temp dir, mocked DSH services)
-node scripts/smoke-client.mjs   # client bundle: handshake, schemas, tab registration, SSR
-```
+- `lib/index.js` —— 宿主半边：`/backup` 命令、`backup_dsh` 工具、
+  `backupPanel` Typert Remote 服务、仅限本机的下载路由与定时备份。
+- `lib/client.js` —— 浏览器半边：手写 Web bundle（无 JSX、无打包器），
+  遵循 shell 的 `window.__ModuleLoader__` 握手；React 运行时从 shell 模块表
+  解析；typert strict codec 用内联极简校验器替代 zod。
 
-## License
+没有 `src/` 和 `scripts/`——直接改 `lib/` 下的文件即可。
 
-MIT
+## 许可证
+
+MIT — forked from [xiaoyuyu6420/dsh-backup](https://github.com/xiaoyuyu6420/dsh-backup)
